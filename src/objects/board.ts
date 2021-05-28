@@ -2,7 +2,6 @@ import { Canvas } from "./canvas";
 import { Player } from "./player";
 import { Square } from "./square";
 
-
 export class Board {
 
     static squareLimit = 9;
@@ -12,14 +11,13 @@ export class Board {
         diags: [[0, 4, 8], [2, 4, 6]]
     }
 
-    static buildBoard() { // Board.buildBoard()
+    static buildBoard() {
         const squares: Square[] = [];
 
         const paddingX = innerWidth / 4;
         const paddingY = innerHeight / 4;
         const squareSize = 150;
-        const buffer = 3;
-        const spacing = squareSize + buffer;
+        const spacing = squareSize;
         let posX: number;
         let posY: number;
 
@@ -38,38 +36,35 @@ export class Board {
 
     squares: Square[] = [];
 
-
     constructor(squares: Square[]) {
         this.squares = squares;
     }
 
 
-    clickingOnSquare() {
+    clickingOnSquare(x: number, y: number, player: Player): boolean {
+        const square = this.getClickedSquare(x, y);
+        if (!square) return false;
 
-
+        square.marker = player.marker;
+        return true;
     }
 
+    getClickedSquare(x: number, y: number): Square {
+        console.log({ x, y });
 
-    drawXAndO(marker: 'X' | 'O') {
+        for (const square of this.squares) {
+            const isInXRange = x >= square.posX && x <= square.posX + square.size;
+            const isInYRange = y >= square.posY && y <= square.posY + square.size;
 
+            if (isInXRange && isInYRange) return square;
+        }
     }
-
-
-    playerChange(name1: 'X', name2: 'O') {
-
-        let startingplayer = 'X'
-
-        return startingplayer = startingplayer === 'X' ? 'O' : 'X';
-    }
-
-
 
     checkForWinRows(marker: 'X' | 'O'): boolean {
         return Board.winConditions.rows.some((row: []) => {
             return row.every((idx: number) => this.squares[idx].marker === marker)
         });
     }
-
 
     checkForWinColumns(marker: 'X' | 'O'): boolean {
         return Board.winConditions.cols.some((col: []) => {
@@ -84,9 +79,13 @@ export class Board {
     }
 
     checkForWin(marker: 'X' | 'O'): boolean {
-        return this.checkForWinRows(marker) ||
-            this.checkForWinColumns(marker) ||
-            this.checkForWinDiagonal(marker);
+        const rowWin = this.checkForWinRows(marker);
+        const colWin = this.checkForWinColumns(marker);
+        const diagWin = this.checkForWinDiagonal(marker);
+
+        console.log({ rowWin, colWin, diagWin });
+
+        return rowWin || colWin || diagWin;
     }
 
 }
